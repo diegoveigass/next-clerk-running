@@ -1,3 +1,4 @@
+import CreateRunningDialog from "@/components/create-running-dialog";
 import {
 	Table,
 	TableBody,
@@ -11,9 +12,12 @@ import {
 export default function RunningPage() {
 	return (
 		<div className="flex flex-1 flex-col gap-4 p-8 pt-6 h-full">
-			<h1 className="text-3xl font-bold">Corridas</h1>
+			<div className="flex justify-between items-center">
+				<h1 className="text-3xl font-bold">Corridas</h1>
+				<CreateRunningDialog />
+			</div>
 			<Table>
-				<TableCaption>A list of your recent invoices.</TableCaption>
+				<TableCaption>Uma lista das corridas realizadas</TableCaption>
 				<TableHeader>
 					<TableRow>
 						<TableHead className="w-[100px]">Id</TableHead>

@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/header";
 
 const geistSans = Geist({
-	variable: "--font-geist-sans",
+	variable: "--font-geist-sans", 
 	subsets: ["latin"],
 });
 
