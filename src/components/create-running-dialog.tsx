@@ -16,27 +16,17 @@ import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const timeRegex = /^((\d+h)?(\d+m)?(\d+s)?)$/;
+import { parseTimeToSeconds, timeRegex } from "@/app/utils/formatter";
 
 const createNewRunningSchema = z.object({
 	time: z
 		.string()
 		.regex(timeRegex, "Formato inválido. Use algo como '1h33m21s'")
 		.transform((value) => {
-			const match = value.match(/(\d+h)?(\d+m)?(\d+s)?/);
-			if (!match) return 0;
-
-			const hours = match[1]
-				? Number.parseInt(match[1].replace("h", "")) * 3600
-				: 0;
-			const minutes = match[2]
-				? Number.parseInt(match[2].replace("m", "")) * 60
-				: 0;
-			const seconds = match[3] ? Number.parseInt(match[3].replace("s", "")) : 0;
-
-			return hours + minutes + seconds;
+			return parseTimeToSeconds(value);
 		}),
+	distance: z.string().transform((value) => Number(value)),
+	pace: z.string(),
 });
 
 type FormValues = z.infer<typeof createNewRunningSchema>;
@@ -48,12 +38,33 @@ export default function CreateRunningDialog() {
 		register,
 		handleSubmit,
 		formState: { errors },
+		watch,
+		setValue,
 	} = useForm({
 		resolver: zodResolver(createNewRunningSchema),
 	});
 
 	function handleCreateNewRunning(data: FormValues) {
-		console.log(data);
+		console.log("form", data);
+	}
+
+	const distance = watch("distance");
+	const time = watch("time");
+
+	function calculatePace(distanceKm: number, timeSeconds: number) {
+		if (distanceKm <= 0 || timeSeconds <= 0) return undefined;
+
+		const paceSecondsPerKm = timeSeconds / distanceKm;
+		const minutes = Math.floor(paceSecondsPerKm / 60);
+		const seconds = Math.round(paceSecondsPerKm % 60);
+
+		return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+	}
+
+	const pace = calculatePace(Number(distance), parseTimeToSeconds(time));
+
+	if (pace) {
+		setValue("pace", pace);
 	}
 
 	return (
@@ -78,7 +89,7 @@ export default function CreateRunningDialog() {
 						</Label>
 						<Input
 							id="time"
-							defaultValue="33m25s"
+							placeholder="33m25s"
 							data-error={!!errors.time}
 							className="col-span-3 data-[error=true]:border data-[error=true]:border-red-500"
 							{...register("time")}
@@ -88,18 +99,28 @@ export default function CreateRunningDialog() {
 						<p className="text-sm text-red-500">{errors.time.message}</p>
 					)}
 					<div className="grid grid-cols-4 items-center gap-4">
-						<Label htmlFor="distance">Distância percorrida</Label>
-						<Input id="distance" defaultValue="4.25" className="col-span-3" />
+						<Label htmlFor="distance">Distância percorrida (km)</Label>
+						<Input
+							id="distance"
+							placeholder="5.22"
+							type="number"
+							step={0.01}
+							className="col-span-3"
+							{...register("distance")}
+						/>
 					</div>
+					{errors.distance && (
+						<p className="text-sm text-red-500">{errors.distance.message}</p>
+					)}
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="pace">Pace (min/km)</Label>
 						<Input
-							id="pace"
-							readOnly
-							disabled
-							value="7:53"
-							prefix="/km"
 							className="col-span-1"
+							readOnly
+							placeholder="8.33"
+							disabled
+							prefix="/km"
+							{...register("pace")}
 						/>
 					</div>
 					<div className="grid grid-cols-4 items-center gap-4">
