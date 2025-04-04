@@ -27,6 +27,7 @@ const createNewRunningSchema = z.object({
 		}),
 	distance: z.string().transform((value) => Number(value)),
 	pace: z.string(),
+	date: z.coerce.date(),
 });
 
 type FormValues = z.infer<typeof createNewRunningSchema>;
@@ -125,8 +126,16 @@ export default function CreateRunningDialog() {
 					</div>
 					<div className="grid grid-cols-4 items-center gap-4">
 						<Label htmlFor="date">Data da corrida</Label>
-						<Input id="date" type="datetime-local" className="col-span-3" />
+						<Input
+							id="date"
+							type="datetime-local"
+							className="col-span-3"
+							{...register("date")}
+						/>
 					</div>
+					{errors.date && (
+						<p className="text-sm text-red-500">{errors.date.message}</p>
+					)}
 					<Button type="submit">Criar</Button>
 				</form>
 			</DialogContent>
