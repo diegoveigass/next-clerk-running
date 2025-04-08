@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
+import dayjs from "dayjs";
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +29,7 @@ const createNewRunningSchema = z.object({
 		}),
 	distance: z.string().transform((value) => Number(value)),
 	pace: z.string(),
-	date: z.coerce.date(),
+	date: z.coerce.date().transform((value) => dayjs(value).toISOString()),
 });
 
 type FormValues = z.infer<typeof createNewRunningSchema>;
