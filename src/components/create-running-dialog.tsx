@@ -47,8 +47,20 @@ export default function CreateRunningDialog() {
 		resolver: zodResolver(createNewRunningSchema),
 	});
 
-	function handleCreateNewRunning(data: FormValues) {
+	async function handleCreateNewRunning(data: FormValues) {
 		console.log("form", data);
+
+		const response = await fetch("/api/running", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+		});
+
+		if (response.status === 201) {
+			setIsOpen(false);
+		}
 	}
 
 	const distance = watch("distance");
